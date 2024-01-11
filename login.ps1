@@ -62,7 +62,7 @@ function login {
     '$keys | Out-File -FilePath "$env:temp\token"' | Out-File -FilePath "$env:temp\setToken.ps1" -Append
     '[reflection.assembly]::LoadWithPartialName( "System.Windows.Forms")' | Out-File -FilePath "$env:temp\setToken.ps1" -Append
     '[System.Windows.Forms.Application]::EnableVisualStyles()' | Out-File -FilePath "$env:temp\setToken.ps1" -Append
-    '[System.Windows.Forms.MessageBox]::show("You have successfully logged in. You can close your browser and return to Echo Navigator", "Bootleg Oculus Downgrader","OK", "Information")' | Out-File -FilePath "$env:temp\setToken.ps1" -Append
+    '[System.Windows.Forms.MessageBox]::show("You have successfully logged in. You can close your browser and return to Bootleg Oculus Downgrader", "Bootleg Oculus Downgrader","OK", "Information")' | Out-File -FilePath "$env:temp\setToken.ps1" -Append
     
     
     $downloadButton.Text = "Waiting for login..."
