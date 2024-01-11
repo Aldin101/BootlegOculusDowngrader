@@ -13,7 +13,7 @@ function downloadQuest{
     $versionInfo = ($versionInfo.versions | Where-Object { $_.id -eq $versionID })
     $OBBs = $versionInfo.obbList
 
-    $segmentProgress.Visible = $true
+    $questDownloadBar.Visible = $true
     $cookie = New-Object System.Net.Cookie
     $cookie.Name = "oc_www_at"
     $cookie.Value = $token
@@ -29,9 +29,9 @@ function downloadQuest{
             $webClient.Headers.Add([System.Net.HttpRequestHeader]::Cookie, $cookie.ToString())
             $webClient.DownloadFile("https://securecdn.oculus.com/binaries/download/?id=$($obb.id)", "$env:temp/$($obb.file_name)")
         } -ArgumentList $cookie, $OBBs[$i]
-        $segmentProgress.Value = 0
+        $questDownloadBar.Value = 0
         while ($job.state -ne "Completed") {
-            $segmentProgress.Value = (((Get-Item "$env:temp/$($OBBs[$i].file_name)").length / $OBBs[$i].sizeNumerical) * 100)
+            $questDownloadBar.Value = (((Get-Item "$env:temp/$($OBBs[$i].file_name)").length / $OBBs[$i].sizeNumerical) * 100)
             start-sleep -Milliseconds 100
         }
         remove-job $job
@@ -44,16 +44,16 @@ function downloadQuest{
         $webClient.Headers.Add([System.Net.HttpRequestHeader]::Cookie, $cookie.ToString())
         $webClient.DownloadFile("https://securecdn.oculus.com/binaries/download/?id=$versionID", "$env:temp\$($versionInfo.file_name)")
     } -ArgumentList $cookie, $versionID, $versionInfo
-    $segmentProgress.Value = 0
+    $questDownloadBar.Value = 0
     while ($job.state -ne "Completed") {
-        $segmentProgress.Value = (((Get-Item "$env:temp\$($versionInfo.file_name)").length / 96177060) * 100)
+        $questDownloadBar.Value = (((Get-Item "$env:temp\$($versionInfo.file_name)").length / 96177060) * 100)
         start-sleep -Milliseconds 100
     }
     remove-job $job
-    $segmentProgress.Value = 100
+    $questDownloadBar.Value = 100
     $downloadButton.text = "Download Complete!"
     $downloadButton.Refresh()
-    $segmentProgress.Visible = $false
+    $questDownloadBar.Visible = $false
 
     $choice = [System.Windows.Forms.MessageBox]::Show("Download Complete! Would you like to install the game onto your headset?", "Bootleg Oculus Downgrader","YesNo", "Question")   
     if ($choice -eq "Yes") {
@@ -142,6 +142,11 @@ function installQuest {
     $packageName = $androidManifest.manifest.package
 
     remove-item -Path "$env:temp\apktools" -Recurse -Force
+
+    if ($null -eq $packageName) {
+        [System.Windows.Forms.MessageBox]::Show("Something went wrong, please try again. [Error: Package Name Missing]", "Bootleg Oculus Downgrader","OK", "Error")
+        return
+    }
 
     & $adb uninstall $packageName
     & $adb install "$env:temp\$($versionInfo.file_name)"
