@@ -1,3 +1,5 @@
 navigator/*
 .vscode/*
-*zip
+*.zip
+*.dll
+*.exe

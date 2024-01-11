@@ -123,5 +123,4 @@ $sizeProgress.Value = 0
 $sizeProgress.Visible = $false
 $menu.Controls.Add($sizeProgress)
 
-
 $menu.ShowDialog()

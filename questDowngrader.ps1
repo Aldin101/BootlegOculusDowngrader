@@ -8,7 +8,7 @@ function downloadQuest{
     $downloadButton.text = "Fetching version info from OculusDB..."
     $db = Invoke-WebRequest "https://oculusdb.rui2015.me/api/v1/connected/$appID" -UseBasicParsing
     $json = $db.Content -replace 'platform', { "platform$(Get-Random -Minimum 1000 -Maximum 9999)" }
-    $versionInfo = $json | ConvertFrom-Json
+    $versionInfo = ConvertFrom-Json $json
 
     $versionInfo = ($versionInfo.versions | Where-Object { $_.id -eq $versionID })
     $OBBs = $versionInfo.obbList
