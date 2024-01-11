@@ -13,7 +13,7 @@ function downloadPrep {
     if ($null -eq $token) {
         return
     }
-    
+
     if ($headset -eq "rift") {
         downloadRift $token $appid $versionID
     } else {
@@ -44,7 +44,6 @@ $ProgressPreference = 'SilentlyContinue'
 
 $menu = new-object System.Windows.Forms.Form
 $menu.text = "Bootleg Oculus Downgrader"
-$menu.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($fileLocation1)
 $menu.Size = New-Object Drawing.Size @(600, 400)
 $menu.StartPosition = "CenterScreen"
 $menu.FormBorderStyle = "FixedDialog"
@@ -77,6 +76,7 @@ $downloadButton.Text = "Download"
 $downloadButton.Add_Click({
     parseDownloadCode
     $downloadButton.enabled = $true
+    $downloadButton.Text = "Download"
 })
 $menu.Controls.Add($downloadButton)
 

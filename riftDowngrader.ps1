@@ -8,7 +8,7 @@ function pickGameFolder {
     }
 
     $pickMenu = new-object System.Windows.Forms.Form
-    $pickMenu.text = "Echo Navigator Installer"
+    $pickMenu.text = "Bootleg Oculus Downgrader"
     $pickMenu.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($fileLocation1)
     $pickMenu.Size = New-Object Drawing.Size @(320, 270)
     $pickMenu.StartPosition = "CenterScreen"
@@ -38,13 +38,13 @@ function pickGameFolder {
     $customPath.Text = "Custom Path"
     $customPath.Font = "Microsoft Sans Serif,10"
     $customPath.Add_Click({
-        $choice = [System.Windows.Forms.MessageBox]::Show("It is recommended that you use the pre-selected folder so that the Oculus app launches the correct version of the game.`n`n`While you can use a custom path it is not recommended. Would you still like to use a custom path?", "Echo Navigator Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
+        $choice = [System.Windows.Forms.MessageBox]::Show("It is recommended that you use the pre-selected folder so that the Oculus app launches the correct version of the game.`n`n`While you can use a custom path it is not recommended. Would you still like to use a custom path?", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
         if ($choice -eq "No") {
             return
         }
         $pickedFolder = Read-FolderBrowserDialog -Message "Select the folder the game is installed in"
         if (!(test-path "$newFolder\Software\$folderName")) {
-            $choice = [System.Windows.Forms.MessageBox]::show("The game was not found in this folder, would you like to continue anyways?", "Echo Navigator Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
+            $choice = [System.Windows.Forms.MessageBox]::show("The game was not found in this folder, would you like to continue anyways?", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
             if ($choice -eq "No") {
                 return
             }
@@ -61,7 +61,7 @@ function pickGameFolder {
     $pickButton.Font = "Microsoft Sans Serif,10"
     $pickButton.Add_Click({
         if (!(test-path "$($locationList[$pickList.SelectedIndex])\Software\$folderName")) {
-            $choice = [System.Windows.Forms.MessageBox]::show("The game was not found in this folder, would you like to pick it anyways?", "Echo Navigator Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
+            $choice = [System.Windows.Forms.MessageBox]::show("The game was not found in this folder, would you like to pick it anyways?", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Warning)
             if ($choice -eq "No") {
                 return
             }
@@ -111,7 +111,7 @@ function downloadRift {
     try {
         Invoke-WebRequest -uri "https://securecdn.oculus.com/binaries/download/?id=$versionID&access_token=$token&get_manifest=1" -OutFile "$env:temp\manifest.zip"
     } catch {
-        [System.Windows.Forms.MessageBox]::show("Failed to start download. This is usually caused by you not owning the game on the account you logged in with, or are disconnected from the internet.", "Echo Navigator Server Browser","OK", "Error")
+        [System.Windows.Forms.MessageBox]::show("Failed to start download. This is usually caused by you not owning the game on the account you logged in with, or are disconnected from the internet.", "Bootleg Oculus Downgrader","OK", "Error")
         $downloadButton.text = "Try again"
         $downloadButton.enabled = $true
         return
@@ -246,14 +246,12 @@ function downloadRift {
     Remove-Item "$gamePath\..\$gameFolderName.downloading\GetHashCode" -recurse -force
     Remove-Item "$gamePath\..\$gameFolderName.downloading\GetType" -recurse -force
     Remove-Item "$gamePath\..\$gameFolderName.downloading\ToString" -recurse -force
-    $choice = [System.Windows.Forms.MessageBox]::show("Would you like to delete your old install?", "Echo Navigator Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Question)
+    $choice = [System.Windows.Forms.MessageBox]::show("Would you like to delete your old install?", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::YesNo, [system.windows.forms.messageboxicon]::Question)
     if ($choice -eq "Yes") {
         remove-item $gamePath -recurse -force
     } else {
         rename-item $gamePath "$gamePath.old"
     }
-    rename-item "$global:gamepath\..\$gameFolderName.downloading\" "$foldegameFolderNamerName" -force
+    rename-item "$gamepath\..\$gameFolderName.downloading\" "$gameFolderName" -force
     $downloadButton.text = "Finished!"
-
-    
 }

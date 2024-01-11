@@ -36,14 +36,14 @@ function downloadQuest{
         }
         remove-job $job
     }
-    $downloadButton.text = "Downloading apk..."
+    $downloadButton.text = "Downloading game files ($($OBBs.count + 1)/$(($OBBs.count) + 1))..."
     $downloadButton.Refresh()
     $job = start-job {
-        param($cookie, $versionInfo)
+        param($cookie, $versionID, $versionInfo)
         $webClient = New-Object System.Net.WebClient
         $webClient.Headers.Add([System.Net.HttpRequestHeader]::Cookie, $cookie.ToString())
         $webClient.DownloadFile("https://securecdn.oculus.com/binaries/download/?id=$versionID", "$env:temp\$($versionInfo.file_name)")
-    } -ArgumentList $cookie, $versionInfo
+    } -ArgumentList $cookie, $versionID, $versionInfo
     $segmentProgress.Value = 0
     while ($job.state -ne "Completed") {
         $segmentProgress.Value = (((Get-Item "$env:temp\$($versionInfo.file_name)").length / 96177060) * 100)
@@ -52,6 +52,8 @@ function downloadQuest{
     remove-job $job
     $segmentProgress.Value = 100
     $downloadButton.text = "Download Complete!"
+    $downloadButton.Refresh()
+    $segmentProgress.Visible = $false
 
     $choice = [System.Windows.Forms.MessageBox]::Show("Download Complete! Would you like to install the game onto your headset?", "Bootleg Oculus Downgrader","YesNo", "Question")   
     if ($choice -eq "Yes") {
@@ -75,7 +77,7 @@ function installQuest {
     )
 
 
-    $adb = "$env:appdata\EchoNavigator\adb\platform-tools\adb.exe"
+    $adb = "$env:temp\adb\platform-tools\adb.exe"
     if (!(Test-Path "$adb")) {
         $downloadButton.text = "Downloading ADB..."
         Invoke-WebRequest "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile "$env:temp\platform-tools.zip"
@@ -86,7 +88,7 @@ function installQuest {
         $devices = & $adb devices
         $devices = $devices -split "`n"
         if ($devices.count -gt 3) {
-            $noDevice = [System.Windows.Forms.MessageBox]::show("More than one device detected, make sure only your Quest is connected to your PC. If you have any other Android devices connected is it a possibility that the game will be installed onto the wrong device. Please unplug any devices that you do not need before pressing retry.", "Echo Navigator", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Error)
+            $noDevice = [System.Windows.Forms.MessageBox]::show("More than one device detected, make sure only your Quest is connected to your PC. If you have any other Android devices connected is it a possibility that the game will be installed onto the wrong device. Please unplug any devices that you do not need before pressing retry.", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Error)
             if ($noDevice -eq "Cancel") {
                 $patchEchoVR.text = "Try again"
                 $installProgress.Visible = $false
@@ -102,7 +104,7 @@ function installQuest {
         $devices = & $adb devices
         $devices = $devices -split "`n"
         if ($devices.count -lt 3) {
-            $noDevice = [System.Windows.Forms.MessageBox]::show("No device detected, make sure your Quest is connected to your PC and developer mode and debug mode are enabled (Google: How to enable developer mode on quest).`n`nIf these things have been done check your headset for a USB debugging message.`n`nIf it still is not working try restarting the headset.", "Echo Navigator", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Error)
+            $noDevice = [System.Windows.Forms.MessageBox]::show("No device detected, make sure your Quest is connected to your PC and developer mode and debug mode are enabled (Google: How to enable developer mode on quest).`n`nIf these things have been done check your headset for a USB debugging message.`n`nIf it still is not working try restarting the headset.", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Error)
             if ($noDevice -eq "Cancel") {
                 $patchEchoVR.text = "Try again"
                 $installProgress.Visible = $false
@@ -117,7 +119,7 @@ function installQuest {
     while (1) {
         $devices = & $adb devices
         if ($devices[1] -like "*unauthorized") {
-            $noDevice = [System.Windows.Forms.MessageBox]::show("This computer is unauthorized. Please accept the prompt in your headset then press retry.", "Echo Navigator", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Warning)
+            $noDevice = [System.Windows.Forms.MessageBox]::show("This computer is unauthorized. Please accept the prompt in your headset then press retry.", "Bootleg Oculus Downgrader", [system.windows.forms.messageboxbuttons]::RetryCancel, [system.windows.forms.messageboxicon]::Warning)
             if ($noDevice -eq "Cancel") {
                 $patchEchoVR.text = "Try again"
                 $installProgress.Visible = $false
@@ -133,17 +135,12 @@ function installQuest {
     $downloadButton.text = "Installing game..."
 
     new-item -Path "$env:temp\apktools" -ItemType Directory -Force
-    expand-archive -path "$env:temp\$($versionInfo.file_name)" -destinationpath "$env:temp\apktools"
+    expand-archive -path ".\Apktool.zip" -destinationpath "$env:temp\apktool"
 
-    $apkPath = "$env:temp\$($versionInfo.file_name)"
-
-    $Apktool = "aapt2-8.2.1-10154469-windows.jar"
-    $jrePath = "jdk-11.0.21+9-jre\bin\java.exe"
-
-    & $jrePath -jar $Apktool d $apkPath -o output 
+    & "$env:temp\apktool\jdk-11.0.21+9-jre\bin\java.exe" -jar "$env:temp\apktool\aapt2-8.2.1-10154469-windows.jar" d "$env:temp\$($versionInfo.file_name)" -o output
     [xml]$androidManifest = Get-Content -Path ".\output\AndroidManifest.xml"
     $packageName = $androidManifest.manifest.package
-    
+
     remove-item -Path "$env:temp\apktools" -Recurse -Force
 
     & $adb uninstall $packageName
@@ -151,6 +148,7 @@ function installQuest {
     foreach ($obb in $OBBs) {
         & $adb push "$env:temp\$($obb.file_name)" "/sdcard/Android/obb/$packageName/$($obb.file_name)"
     }
+    [System.Windows.Forms.MessageBox]::Show("Game installed!", "Bootleg Oculus Downgrader","OK", "Info")
 }
 
 function Read-FolderBrowserDialog([string]$Message, [string]$InitialDirectory) {
