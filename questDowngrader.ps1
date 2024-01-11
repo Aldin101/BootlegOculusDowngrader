@@ -132,6 +132,9 @@ function installQuest {
 
     $downloadButton.text = "Installing game..."
 
+    new-item -Path "$env:temp\apktools" -ItemType Directory -Force
+    expand-archive -path "$env:temp\$($versionInfo.file_name)" -destinationpath "$env:temp\apktools"
+
     $apkPath = "$env:temp\$($versionInfo.file_name)"
 
     $Apktool = "aapt2-8.2.1-10154469-windows.jar"
@@ -140,6 +143,8 @@ function installQuest {
     & $jrePath -jar $Apktool d $apkPath -o output 
     [xml]$androidManifest = Get-Content -Path ".\output\AndroidManifest.xml"
     $packageName = $androidManifest.manifest.package
+    
+    remove-item -Path "$env:temp\apktools" -Recurse -Force
 
     & $adb uninstall $packageName
     & $adb install "$env:temp\$($versionInfo.file_name)"

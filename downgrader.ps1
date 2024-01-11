@@ -66,13 +66,13 @@ $menu.Controls.Add($helpLabel)
 
 $codeEntry = New-Object System.Windows.Forms.TextBox
 $codeEntry.Location = New-Object System.Drawing.Size(10, 150)
-$codeEntry.Size = New-Object System.Drawing.Size(570, 20)
+$codeEntry.Size = New-Object System.Drawing.Size(560, 20)
 $codeEntry.Text = "Enter your downgrade code here"
 $menu.Controls.Add($codeEntry)
 
 $downloadButton = New-Object System.Windows.Forms.Button
 $downloadButton.Location = New-Object System.Drawing.Size(10, 180)
-$downloadButton.Size = New-Object System.Drawing.Size(570, 30)
+$downloadButton.Size = New-Object System.Drawing.Size(560, 30)
 $downloadButton.Text = "Download"
 $downloadButton.Add_Click({
     parseDownloadCode
