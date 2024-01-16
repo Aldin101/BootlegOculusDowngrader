@@ -4,7 +4,7 @@ function pickGameFolder {
     $locations = Get-ChildItem "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\*"
     $locationList = [System.Collections.ArrayList]@()
     foreach ($location in $locations) {
-        $locationList.Add($(Get-ItemProperty "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\$($location.PSChildName)" -Name OriginalPath | select -ExpandProperty OriginalPath))
+        $locationList.Add($(Get-ItemProperty "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\$($location.PSChildName)" -Name OriginalPath | Select-Object -ExpandProperty OriginalPath)) | Out-Null
     }
 
     $pickMenu = new-object System.Windows.Forms.Form
@@ -52,7 +52,7 @@ function pickGameFolder {
         $global:newFolder = $pickedFolder
         $pickMenu.Close()
     })
-    $pickMenu.Controls.Add($customPath)
+    $pickMenu.Controls.Add($customPath) | Out-Null
 
     $pickButton = New-Object System.Windows.Forms.Button
     $pickButton.Location = New-Object System.Drawing.Size(10,180)
@@ -71,7 +71,7 @@ function pickGameFolder {
     })
     $pickMenu.Controls.Add($pickButton)
 
-    $pickMenu.ShowDialog()
+    $pickMenu.ShowDialog() | Out-Null
     return $newFolder
 }
 
@@ -80,9 +80,9 @@ function findGameFolder {
     $locations = Get-ChildItem "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\*"
     $locationList = [System.Collections.ArrayList]@()
     foreach ($location in $locations) {
-        $locationList.Add($(Get-ItemProperty "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\$($location.PSChildName)" -Name OriginalPath | select -ExpandProperty OriginalPath)) | Out-Null
+        $locationList.Add($(Get-ItemProperty "HKCU:\SOFTWARE\Oculus VR, LLC\Oculus\Libraries\$($location.PSChildName)" -Name OriginalPath | Select-Object -ExpandProperty OriginalPath)) | Out-Null
     }
-    $locations = [system.Collections.ArrayList]@()
+    $locations = [System.Collections.ArrayList]@()
     foreach ($location in $locationList) {
         if (test-path "$location\Software\$folderName") {
             $locations.Add($location) | Out-Null
@@ -91,7 +91,7 @@ function findGameFolder {
     if ($locations.count -eq 1) {
         return "$($locations)\Software\$folderName"
     } else {
-        return pickGameFolder $folderName
+        return "$(pickGameFolder)\Software\$folderName"
     }
 }
 
@@ -101,7 +101,7 @@ function downloadRift {
         [string]$appID,
         [string]$versionID
     )
-    
+
 
     $downloadButton.text = "Downloading Manifest..."
     $downloadButton.Refresh()
